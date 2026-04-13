@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  estoque:
+    build: ./estoque/EstoqueService
+    ports:
+      - "8081:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=estoque_db;Username=postgres;Password=postgres
+    depends_on:
+      - db
+
+  faturamento:
+    build: ./faturamento/FaturamentoService
+    ports:
+      - "8082:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=faturamento_db;Username=postgres;Password=postgres
+      - EstoqueUrl=http://estoque:8080
+    depends_on:
+      - db
+      - estoque
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - estoque
+      - faturamento
+
+volumes:
+  pgdata:

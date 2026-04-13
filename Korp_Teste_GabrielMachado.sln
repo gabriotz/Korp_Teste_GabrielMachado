@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "estoque", "estoque", "{50550AE8-2284-912A-C6A6-40AEDFAB45B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EstoqueService", "estoque\EstoqueService\EstoqueService.csproj", "{888E5722-A98B-5862-B266-7E74B3367208}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{888E5722-A98B-5862-B266-7E74B3367208}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{888E5722-A98B-5862-B266-7E74B3367208}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{888E5722-A98B-5862-B266-7E74B3367208}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{888E5722-A98B-5862-B266-7E74B3367208}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{888E5722-A98B-5862-B266-7E74B3367208} = {50550AE8-2284-912A-C6A6-40AEDFAB45B2}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B33807C8-573D-43BC-B783-28A41DB78CBF}
+	EndGlobalSection
+EndGlobal
