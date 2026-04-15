@@ -1,0 +1,39 @@
+<div class="container">
+  <div class="header">
+    <h2>Produtos</h2>
+    <a routerLink="/produtos/novo" class="btn-primary">+ Novo Produto</a>
+  </div>
+
+  @if (carregando) {
+    <p>Carregando...</p>
+  }
+
+  @if (erro) {
+    <p class="erro">{{ erro }}</p>
+  }
+
+  @if (!carregando && produtos.length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descrição</th>
+          <th>Saldo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of produtos; track p.id) {
+          <tr>
+            <td>{{ p.codigo }}</td>
+            <td>{{ p.descricao }}</td>
+            <td>{{ p.saldo }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!carregando && produtos.length === 0 && !erro) {
+    <p>Nenhum produto cadastrado.</p>
+  }
+</div>
