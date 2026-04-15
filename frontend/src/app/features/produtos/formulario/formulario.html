@@ -1,0 +1,38 @@
+<div class="container">
+  <h2>Novo Produto</h2>
+
+  <form [formGroup]="form" (ngSubmit)="salvar()">
+    <div class="field">
+      <label>Código</label>
+      <input formControlName="codigo" maxlength="20" />
+      <span class="erro" *ngIf="form.get('codigo')?.invalid && form.get('codigo')?.touched">
+        Código é obrigatório.
+      </span>
+    </div>
+
+    <div class="field">
+      <label>Descrição</label>
+      <input formControlName="descricao" />
+      <span class="erro" *ngIf="form.get('descricao')?.invalid && form.get('descricao')?.touched">
+        Descrição é obrigatória.
+      </span>
+    </div>
+
+    <div class="field">
+      <label>Saldo</label>
+      <input type="number" formControlName="saldo" min="0" />
+      <span class="erro" *ngIf="form.get('saldo')?.invalid && form.get('saldo')?.touched">
+        Saldo deve ser maior ou igual a zero.
+      </span>
+    </div>
+
+    <p *ngIf="erro" class="erro">{{ erro }}</p>
+
+    <div class="actions">
+      <button type="button" (click)="router.navigate(['/produtos'])">Cancelar</button>
+      <button type="submit" [disabled]="salvando">
+        {{ salvando ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</div>
