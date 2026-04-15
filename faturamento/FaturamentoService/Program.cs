@@ -1,30 +1,56 @@
-using FaturamentoService.Data;
+using FaturamentoService.API.Middleware;
+using FaturamentoService.Application.Interfaces;
+using FaturamentoService.Application.Services;
+using FaturamentoService.Domain.Interfaces;
+using FaturamentoService.Infrastructure.Data;
+using FaturamentoService.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//  Swagger / OpenAPI
+// ── Infra ──────────────────────────────────────────────────────────────────
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+);
+
+// ── HttpClient para comunicação com o EstoqueService ───────────────────────
+builder.Services.AddHttpClient("Estoque", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["EstoqueUrl"]!);
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+
+// ── DI ─────────────────────────────────────────────────────────────────────
+builder.Services.AddScoped<INotaFiscalRepository, NotaFiscalRepository>();
+builder.Services.AddScoped<INotaFiscalService, NotaFiscalService>();
+
+// ── API ────────────────────────────────────────────────────────────────────
+builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-//  Controllers
-builder.Services.AddControllers();
-
-//  DbContext (PostgreSQL)
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")
-    )
-);
+// ── CORS ───────────────────────────────────────────────────────────────────
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+    );
+});
 
 var app = builder.Build();
 
-// Swagger só em dev
-if (app.Environment.IsDevelopment())
+// ── Migrations automáticas ─────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
 {
-    app.MapOpenApi();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
 }
 
-app.UseHttpsRedirection();
+// ── Pipeline ───────────────────────────────────────────────────────────────
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseCors();
+
+if (app.Environment.IsDevelopment())
+    app.MapOpenApi();
 
 app.MapControllers();
 
