@@ -1,0 +1,57 @@
+<div class="container">
+  <h2>Nova Nota Fiscal</h2>
+
+  @if (erroProdutos) {
+    <p class="erro">{{ erroProdutos }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="salvar()">
+    <div formArrayName="itens">
+      @for (item of itens.controls; track $index) {
+        <div [formGroupName]="$index" class="item">
+          <div class="item-fields">
+            <div class="field">
+              <label>Produto</label>
+              <select formControlName="produtoId">
+                <option value="">Selecione...</option>
+                @for (p of produtos; track p.id) {
+                  <option [value]="p.id">{{ p.codigo }} — {{ p.descricao }} (saldo: {{ p.saldo }})</option>
+                }
+              </select>
+              @if (produtoDuplicado($index)) {
+                <span class="erro">Produto já adicionado em outro item.</span>
+              }
+            </div>
+
+            <div class="field">
+              <label>Quantidade</label>
+              <input type="number" formControlName="quantidade" min="1" />
+              @if (quantidadeExcedeSaldo($index)) {
+                <span class="erro">
+                  Quantidade excede o saldo disponível ({{ getProduto($index)?.saldo }}).
+                </span>
+              }
+            </div>
+          </div>
+
+          @if (itens.length > 1) {
+            <button type="button" (click)="removerItem($index)" class="btn-remover">Remover</button>
+          }
+        </div>
+      }
+    </div>
+
+    <button type="button" (click)="adicionarItem()" class="btn-secundario">+ Adicionar Item</button>
+
+    @if (erro) {
+      <p class="erro">{{ erro }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" (click)="router.navigate(['/notas-fiscais'])">Cancelar</button>
+      <button type="submit" [disabled]="salvando || !formValido()">
+        {{ salvando ? 'Salvando...' : 'Criar Nota' }}
+      </button>
+    </div>
+  </form>
+</div>
