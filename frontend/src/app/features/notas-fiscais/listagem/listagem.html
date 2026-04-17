@@ -1,0 +1,62 @@
+<div class="container">
+  <div class="header">
+    <h2>Notas Fiscais</h2>
+    <a routerLink="/notas-fiscais/nova" class="btn-primary">+ Nova Nota</a>
+  </div>
+
+  @if (carregando) {
+    <p>Carregando...</p>
+  }
+
+  @if (erro) {
+    <p class="erro">{{ erro }}</p>
+  }
+
+  @if (sucesso) {
+    <p class="sucesso">{{ sucesso }}</p>
+  }
+
+  @if (erroImpressao) {
+    <p class="erro">{{ erroImpressao }}</p>
+  }
+
+  @if (!carregando && notas.length > 0) {
+    <table>
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Status</th>
+          <th>Itens</th>
+          <th>Criada em</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (nota of notas; track nota.id) {
+          <tr>
+            <td>{{ nota.numero }}</td>
+            <td>
+              <span [class]="nota.status === 'Aberta' ? 'badge-aberta' : 'badge-fechada'">
+                {{ nota.status }}
+              </span>
+            </td>
+            <td>{{ nota.itens.length }} item(s)</td>
+            <td>{{ nota.criadaEm | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <button
+                (click)="imprimir(nota.id)"
+                [disabled]="nota.status === 'Fechada' || imprimindo === nota.id"
+                class="btn-imprimir">
+                {{ imprimindo === nota.id ? 'Processando...' : 'Imprimir' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!carregando && notas.length === 0 && !erro) {
+    <p>Nenhuma nota fiscal cadastrada.</p>
+  }
+</div>
