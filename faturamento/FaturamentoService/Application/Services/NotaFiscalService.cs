@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FaturamentoService.Application.DTOs;
 using FaturamentoService.Application.Interfaces;
 using FaturamentoService.Domain.Entities;
@@ -11,10 +12,13 @@ public sealed class NotaFiscalService : INotaFiscalService
     private readonly INotaFiscalRepository _repository;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public NotaFiscalService(INotaFiscalRepository repository, IHttpClientFactory httpClientFactory)
+    private readonly IConfiguration _configuration;
+
+    public NotaFiscalService(INotaFiscalRepository repository, IHttpClientFactory httpClientFactory, IConfiguration configuration)
     {
         _repository = repository;
         _httpClientFactory = httpClientFactory;
+        _configuration = configuration;
     }
 
     public async Task<IReadOnlyList<NotaFiscalResponse>> GetAllAsync(CancellationToken ct = default)
@@ -107,6 +111,69 @@ public sealed class NotaFiscalService : INotaFiscalService
         await _repository.SaveChangesAsync(ct);
         return ToResponse(nota);
     }
+
+    public async Task<ResumoNotaResponse> GerarResumoAsync(int id, CancellationToken ct = default)
+{
+
+    var nota = await _repository.GetByIdAsync(id, ct)
+        ?? throw new NotaNaoEncontradaException(id);
+
+    var itensTexto = string.Join(", ", nota.Itens.Select(i => $"{i.Quantidade}x {i.ProdutoDescricao}"));
+
+    var prompt = $@"Gere um resumo curto e profissional em português de uma nota fiscal com os seguintes dados:
+- Número da nota: {nota.Numero}
+- Status: {nota.Status}
+- Total de itens: {nota.Itens.Count}
+- Produtos: {itensTexto}
+- Data de emissão: {nota.CriadaEm:dd/MM/yyyy HH:mm}
+
+O resumo deve ter no máximo 2 frases, ser direto e informativo.";
+
+    var apiKey = _configuration["Gemini:ApiKey"];
+    Console.WriteLine($"API KEY: '{apiKey}'");
+
+    var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
+
+    var body = new
+    {
+        contents = new[]
+        {
+            new
+            {
+                parts = new[]
+                {
+                    new { text = prompt }
+                }
+            }
+        }
+    };
+
+    try
+{
+    var client = _httpClientFactory.CreateClient();
+    var response = await client.PostAsJsonAsync(url, body, ct);
+    
+    var conteudo = await response.Content.ReadAsStringAsync(ct);
+    
+    if (!response.IsSuccessStatusCode)
+        throw new Exception($"Gemini retornou {response.StatusCode}: {conteudo}");
+
+    var result = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: ct);
+    var resumo = result
+        .GetProperty("candidates")[0]
+        .GetProperty("content")
+        .GetProperty("parts")[0]
+        .GetProperty("text")
+        .GetString() ?? "Resumo indisponível.";
+
+    return new ResumoNotaResponse(resumo.Trim());
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"ERRO GEMINI: {ex.Message}");
+    return new ResumoNotaResponse("Não foi possível gerar o resumo da nota.");
+}
+}
 
     // ── Mapeamento ──────────────────────────────────────────────────────────
 
