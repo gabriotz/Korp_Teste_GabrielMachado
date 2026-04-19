@@ -25,6 +25,8 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=faturamento_db;Username=postgres;Password=postgres
       - EstoqueUrl=http://estoque:8080
+      - Gemini__ApiKey=${GEMINI_API_KEY}
+
     depends_on:
       - db
       - estoque
