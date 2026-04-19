@@ -28,4 +28,8 @@ export class NotaFiscalService {
   imprimir(id: number): Observable<NotaFiscal> {
     return this.http.post<NotaFiscal>(`${this.url}/${id}/imprimir`, {});
   }
+
+  gerarResumo(id: number): Observable<{ resumo: string }> {
+    return this.http.post<{ resumo: string }>(`${this.url}/${id}/resumo`, {});
+  }
 }

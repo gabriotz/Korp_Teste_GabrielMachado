@@ -18,9 +18,14 @@ export class NotasListagemComponent implements OnInit, OnDestroy {
   notas: NotaFiscal[] = [];
   erro = '';
   erroImpressao = '';
+  erroResumo = '';
   sucesso = '';
   carregando = false;
   imprimindo: number | null = null;
+  resumindo: number | null = null;
+  modalResumoAberto = false;
+  resumoGerado = '';
+  notaResumoId: number | null = null;
 
   private destroy$ = new Subject<void>();
 
@@ -83,5 +88,38 @@ export class NotasListagemComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         }
       });
+  }
+
+  gerarResumo(id: number): void {
+    this.resumindo = id;
+    this.erroResumo = '';
+
+    this.notaService.gerarResumo(id)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.resumindo = null;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: ({ resumo }) => {
+          this.notaResumoId = id;
+          this.resumoGerado = resumo;
+          this.modalResumoAberto = true;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.erroResumo = err.error?.message ?? 'Erro ao gerar resumo da nota.';
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  fecharModalResumo(): void {
+    this.modalResumoAberto = false;
+    this.resumoGerado = '';
+    this.notaResumoId = null;
+    this.cdr.detectChanges();
   }
 }
