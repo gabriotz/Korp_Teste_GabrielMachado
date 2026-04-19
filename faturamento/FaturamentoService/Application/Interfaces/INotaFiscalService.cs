@@ -9,4 +9,5 @@ public interface INotaFiscalService
     Task<IReadOnlyList<ProdutoDto>> GetProdutosDisponiveisAsync(CancellationToken ct = default);
     Task<NotaFiscalResponse> CreateAsync(CriarNotaRequest request, CancellationToken ct = default);
     Task<NotaFiscalResponse> ImprimirAsync(int id, CancellationToken ct = default);
+    Task<ResumoNotaResponse> GerarResumoAsync(int id, CancellationToken ct = default);
 }
