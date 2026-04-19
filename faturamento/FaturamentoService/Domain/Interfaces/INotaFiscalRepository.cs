@@ -9,4 +9,5 @@ public interface INotaFiscalRepository
     Task<int> GetProximoNumeroAsync(CancellationToken ct = default);
     Task AddAsync(NotaFiscal nota, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
+    Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);
 }

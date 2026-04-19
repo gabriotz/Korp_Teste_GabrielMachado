@@ -51,14 +51,16 @@ public sealed class NotaFiscalService : INotaFiscalService
     }
 
     public async Task<NotaFiscalResponse> CreateAsync(CriarNotaRequest request, CancellationToken ct = default)
+{
+    if (request.Itens == null || !request.Itens.Any())
+        throw new ArgumentException("A nota deve ter ao menos um item.");
+
+    var produtos = await GetProdutosDisponiveisAsync(ct);
+
+    // Transaction garante que dois requests simultâneos não pegam o mesmo número
+    await using var transaction = await _repository.BeginTransactionAsync(ct);
+    try
     {
-        if (request.Itens == null || !request.Itens.Any())
-            throw new ArgumentException("A nota deve ter ao menos um item.");
-
-        // Busca produtos do Estoque pra guardar a descrição no item
-        var produtos = await GetProdutosDisponiveisAsync(ct);
-
-        // LINQ — MaxAsync via repositório (numeração sequencial)
         var numero = await _repository.GetProximoNumeroAsync(ct);
         var nota = NotaFiscal.Criar(numero);
 
@@ -72,9 +74,16 @@ public sealed class NotaFiscalService : INotaFiscalService
 
         await _repository.AddAsync(nota, ct);
         await _repository.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
 
         return ToResponse(nota);
     }
+    catch
+    {
+        await transaction.RollbackAsync(ct);
+        throw;
+    }
+}
 
     public async Task<NotaFiscalResponse> ImprimirAsync(int id, CancellationToken ct = default)
     {

@@ -50,4 +50,9 @@ public sealed class NotaFiscalRepository : INotaFiscalRepository
     {
         await _context.SaveChangesAsync(ct);
     }
+
+    public async Task<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default)
+{
+    return await _context.Database.BeginTransactionAsync(ct);
+}
 }
