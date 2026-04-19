@@ -53,4 +53,11 @@ public sealed class NotasFiscaisController : ControllerBase
 
     [HttpGet("health")]
     public IActionResult Health() => Ok(new { status = "ok", service = "FaturamentoService" });
+
+    [HttpPost("{id:int}/resumo")]
+    public async Task<IActionResult> GerarResumo(int id, CancellationToken ct)
+    {
+        var resumo = await _service.GerarResumoAsync(id, ct);
+        return Ok(resumo);
+    }
 }
