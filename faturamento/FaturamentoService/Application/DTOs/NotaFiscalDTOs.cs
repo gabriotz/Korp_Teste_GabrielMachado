@@ -34,3 +34,5 @@ public sealed record ProdutoDto(
 );
 
 public sealed record ErrorResponse(string Message, string? Detail = null);
+
+public sealed record ResumoNotaResponse(string Resumo);
