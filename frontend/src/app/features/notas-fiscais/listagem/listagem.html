@@ -20,6 +20,10 @@
     <p class="erro">{{ erroImpressao }}</p>
   }
 
+  @if (erroResumo) {
+    <p class="erro">{{ erroResumo }}</p>
+  }
+
   @if (!carregando && notas.length > 0) {
     <table>
       <thead>
@@ -43,12 +47,21 @@
             <td>{{ nota.itens.length }} item(s)</td>
             <td>{{ nota.criadaEm | date:'dd/MM/yyyy HH:mm' }}</td>
             <td>
-              <button
-                (click)="imprimir(nota.id)"
-                [disabled]="nota.status === 'Fechada' || imprimindo === nota.id"
-                class="btn-imprimir">
-                {{ imprimindo === nota.id ? 'Processando...' : 'Imprimir' }}
-              </button>
+              <div class="acoes">
+                <button
+                  (click)="imprimir(nota.id)"
+                  [disabled]="nota.status === 'Fechada' || imprimindo === nota.id"
+                  class="btn-imprimir">
+                  {{ imprimindo === nota.id ? 'Processando...' : 'Imprimir' }}
+                </button>
+
+                <button
+                  (click)="gerarResumo(nota.id)"
+                  [disabled]="resumindo === nota.id"
+                  class="btn-resumo">
+                  {{ resumindo === nota.id ? 'Gerando...' : 'IA Summary' }}
+                </button>
+              </div>
             </td>
           </tr>
         }
@@ -58,5 +71,15 @@
 
   @if (!carregando && notas.length === 0 && !erro) {
     <p>Nenhuma nota fiscal cadastrada.</p>
+  }
+
+  @if (modalResumoAberto) {
+    <div class="modal-overlay" (click)="fecharModalResumo()">
+      <div class="modal-resumo" (click)="$event.stopPropagation()">
+        <h3>Resumo IA da Nota {{ notaResumoId }}</h3>
+        <p class="resumo-texto">{{ resumoGerado }}</p>
+        <button class="btn-fechar" (click)="fecharModalResumo()">Fechar</button>
+      </div>
+    </div>
   }
 </div>
