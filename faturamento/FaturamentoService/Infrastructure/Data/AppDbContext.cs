@@ -9,6 +9,7 @@ public sealed class AppDbContext : DbContext
 
     public DbSet<NotaFiscal> NotasFiscais => Set<NotaFiscal>();
     public DbSet<ItemNota> ItenNota => Set<ItemNota>();
+    public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,6 +40,16 @@ public sealed class AppDbContext : DbContext
             entity.Property(i => i.ProdutoId).IsRequired();
             entity.Property(i => i.ProdutoDescricao).IsRequired().HasMaxLength(200);
             entity.Property(i => i.Quantidade).IsRequired();
+        });
+
+        modelBuilder.Entity<IdempotencyRecord>(entity =>
+        {
+            entity.ToTable("IdempotencyRecords");
+            entity.HasKey(i => i.Key);
+            entity.Property(i => i.Key).HasMaxLength(100);
+            entity.Property(i => i.Response).IsRequired();
+            entity.Property(i => i.StatusCode).IsRequired();
+            entity.Property(i => i.CriadoEm).IsRequired();
         });
     }
 }

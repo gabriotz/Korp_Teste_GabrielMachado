@@ -61,6 +61,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // ── Pipeline ───────────────────────────────────────────────────────────────
+app.UseMiddleware<IdempotencyMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors();
 
