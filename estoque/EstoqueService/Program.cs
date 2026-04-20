@@ -34,12 +34,26 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // ── Migrations automáticas ao iniciar (útil com Docker) ───────────────────
+// ── Migrations automáticas com retry ──────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
+    var retries = 5;
+    while (retries > 0)
+    {
+        try
+        {
+            await db.Database.MigrateAsync();
+            break;
+        }
+        catch
+        {
+            retries--;
+            if (retries == 0) throw;
+            await Task.Delay(3000);
+        }
+    }
 }
-
 // ── Pipeline ───────────────────────────────────────────────────────────────
 app.UseMiddleware<ExceptionHandlingMiddleware>(); // Tratamento global de erros
 
